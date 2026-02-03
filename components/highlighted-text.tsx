@@ -17,9 +17,9 @@ interface HighlightedTextProps {
 }
 
 const severityColors = {
-  low: 'bg-yellow-200/50 hover:bg-yellow-200 dark:bg-yellow-900/50 dark:hover:bg-yellow-900',
-  medium: 'bg-orange-200/50 hover:bg-orange-200 dark:bg-orange-900/50 dark:hover:bg-orange-900',
-  high: 'bg-red-200/50 hover:bg-red-200 dark:bg-red-900/50 dark:hover:bg-red-900',
+  low: 'bg-[#E5D84A]/30 hover:bg-[#E5D84A]/50',
+  medium: 'bg-[#FF8400]/30 hover:bg-[#FF8400]/50',
+  high: 'bg-[#FF5C33]/30 hover:bg-[#FF5C33]/50',
 };
 
 export function HighlightedText({ text, tactics, onTacticHover }: HighlightedTextProps) {

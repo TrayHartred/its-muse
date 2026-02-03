@@ -1,24 +1,28 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { AuditResponse } from '@/lib/schemas';
-import { AnalyzeForm } from '@/components/analyze-form';
-import { HighlightedText } from '@/components/highlighted-text';
-import { ResultPanel } from '@/components/result-panel';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { InputPanel } from '@/components/input-panel';
+import { ComparisonView } from '@/components/comparison-view';
+import { AnalysisAccordion } from '@/components/analysis-accordion';
+import { CopiedToast } from '@/components/copied-toast';
+import { useAutoCopy } from '@/hooks/use-auto-copy';
+
+type AppState = 'input' | 'loading' | 'result';
 
 export default function Home() {
-  const [isLoading, setIsLoading] = useState(false);
+  const [state, setState] = useState<AppState>('input');
   const [error, setError] = useState<string | null>(null);
-  const [originalText, setOriginalText] = useState<string | null>(null);
+  const [originalText, setOriginalText] = useState('');
   const [result, setResult] = useState<AuditResponse | null>(null);
-  const [highlightedTactic, setHighlightedTactic] = useState<number | null>(null);
+  const [, setHighlightedTactic] = useState<number | null>(null);
 
-  const handleAnalyze = async (text: string) => {
-    setIsLoading(true);
+  const { autoCopy, copyText, showCopiedToast } = useAutoCopy();
+
+  const handleFilter = useCallback(async (text: string) => {
+    setState('loading');
     setError(null);
     setOriginalText(text);
-    setResult(null);
 
     try {
       const response = await fetch('/api/audit', {
@@ -29,99 +33,131 @@ export default function Home() {
 
       if (!response.ok) {
         const data = await response.json();
-        throw new Error(data.error || 'Analysis failed');
+        throw new Error(data.error || 'Filter failed');
       }
 
       const data: AuditResponse = await response.json();
       setResult(data);
+      setState('result');
+
+      // Auto-copy if enabled
+      if (autoCopy && data.neutralRewrite) {
+        copyText(data.neutralRewrite);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error');
-    } finally {
-      setIsLoading(false);
+      setState('input');
     }
-  };
+  }, [autoCopy, copyText]);
 
+  const handleReset = useCallback(() => {
+    setState('input');
+    setResult(null);
+    setOriginalText('');
+    setError(null);
+  }, []);
+
+  const handleCopy = useCallback(() => {
+    if (result?.neutralRewrite) {
+      copyText(result.neutralRewrite);
+    }
+  }, [result, copyText]);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Cmd+C in result state copies clean text
+      if (e.metaKey && e.key === 'c' && state === 'result' && result?.neutralRewrite) {
+        // Only if no text is selected
+        const selection = window.getSelection();
+        if (!selection || selection.toString() === '') {
+          e.preventDefault();
+          copyText(result.neutralRewrite);
+        }
+      }
+
+      // Esc resets to input
+      if (e.key === 'Escape' && state === 'result') {
+        handleReset();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [state, result, copyText, handleReset]);
+
+  // Input state
+  if (state === 'input') {
+    return (
+      <main className="min-h-screen">
+        <InputPanel onSubmit={handleFilter} isLoading={false} />
+        {error && (
+          <p className="text-center text-sm text-destructive mt-4">{error}</p>
+        )}
+        <CopiedToast show={showCopiedToast} />
+      </main>
+    );
+  }
+
+  // Loading state
+  if (state === 'loading') {
+    return (
+      <main className="min-h-screen flex flex-col items-center justify-center px-4">
+        <div className="w-full max-w-2xl">
+          <div className="rounded-lg border bg-card p-6">
+            <p className="text-muted-foreground mb-4 line-clamp-3">
+              {originalText.slice(0, 200)}{originalText.length > 200 ? '...' : ''}
+            </p>
+            <div className="flex items-center justify-center gap-2 text-muted-foreground">
+              <div className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full" />
+              <span>Filtering...</span>
+            </div>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  // Result state
   return (
-    <main className="container mx-auto px-4 py-8">
+    <main className="min-h-screen">
       {/* Header */}
-      <div className="mb-8 text-center">
-        <h1 className="text-3xl font-bold tracking-tight">
-          Arcimun Disclosure Filter
-        </h1>
-        <p className="mt-2 text-muted-foreground">
-          Strip manipulative tactics, guardrails, and hidden framing from any text
-        </p>
-      </div>
-
-      {/* Main Content */}
-      <div className="grid gap-8 lg:grid-cols-2">
-        {/* Left Panel: Input / Original Text */}
-        <div className="space-y-4">
-          {!result ? (
-            <Card>
-              <CardHeader>
-                <CardTitle>Input Text</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <AnalyzeForm onAnalyze={handleAnalyze} isLoading={isLoading} />
-                {error && (
-                  <p className="mt-4 text-sm text-destructive">{error}</p>
-                )}
-              </CardContent>
-            </Card>
-          ) : (
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle>Original Text</CardTitle>
-                <button
-                  onClick={() => {
-                    setResult(null);
-                    setOriginalText(null);
-                  }}
-                  className="text-sm text-muted-foreground hover:text-foreground"
-                >
-                  &larr; Analyze new text
-                </button>
-              </CardHeader>
-              <CardContent>
-                <HighlightedText
-                  text={originalText!}
-                  tactics={result.tactics}
-                  onTacticHover={setHighlightedTactic}
-                />
-              </CardContent>
-            </Card>
-          )}
+      <header className="border-b">
+        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+          <h1 className="font-semibold">ADF &middot; Bullshit Filter</h1>
+          <button
+            onClick={handleReset}
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            &larr; New text
+          </button>
         </div>
+      </header>
 
-        {/* Right Panel: Results */}
-        <div>
-          {isLoading && (
-            <Card>
-              <CardContent className="py-12 text-center">
-                <div className="animate-pulse text-muted-foreground">
-                  Analyzing text for manipulative tactics...
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {result && (
-            <ResultPanel
-              result={result}
-              highlightedTactic={highlightedTactic}
+      {/* Content */}
+      <div className="container mx-auto px-4 py-6">
+        {result && (
+          <>
+            <ComparisonView
+              originalText={originalText}
+              cleanText={result.neutralRewrite || originalText}
+              tactics={result.tactics}
+              onTacticHover={setHighlightedTactic}
+              onCopy={handleCopy}
+              copied={showCopiedToast}
             />
-          )}
 
-          {!result && !isLoading && (
-            <Card>
-              <CardContent className="py-12 text-center text-muted-foreground">
-                <p>Paste text and click Analyze to detect manipulative tactics</p>
-              </CardContent>
-            </Card>
-          )}
-        </div>
+            {result.tactics.length > 0 && (
+              <AnalysisAccordion
+                tactics={result.tactics}
+                onTacticHover={setHighlightedTactic}
+              />
+            )}
+          </>
+        )}
       </div>
+
+      <CopiedToast show={showCopiedToast} />
     </main>
   );
 }
