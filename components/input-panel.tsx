@@ -108,7 +108,7 @@ export function InputPanel({ onSubmit, isLoading, theme = 'dark' }: InputPanelPr
   };
 
   return (
-    <div className="flex flex-col items-center justify-center h-full px-4 py-6">
+    <div className="flex flex-col items-center justify-center h-full px-4 pt-6 pb-20">
       <div className="flex flex-col items-center gap-4 mb-8">
         <div className="flex items-center gap-3">
           <h1
