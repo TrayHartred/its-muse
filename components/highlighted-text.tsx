@@ -58,9 +58,9 @@ export function HighlightedText({ text, tactics, onTacticHover }: HighlightedTex
                       className="w-1.5 h-1.5 rounded-full"
                       style={{ backgroundColor: colors.border }}
                     />
-                    <span className="font-medium text-[13px] text-[#E4E4E7]">{tactic.name}</span>
+                    <span className="font-medium text-[14px] text-[#E4E4E7]">{tactic.name}</span>
                     <span
-                      className="px-1.5 py-0.5 rounded text-[9px] font-bold tracking-wide"
+                      className="px-1.5 py-0.5 rounded text-[10px] font-bold tracking-wide"
                       style={{
                         backgroundColor: `${colors.border}20`,
                         color: colors.border
@@ -69,7 +69,7 @@ export function HighlightedText({ text, tactics, onTacticHover }: HighlightedTex
                       {tactic.severity.toUpperCase()}
                     </span>
                   </div>
-                  <p className="text-[12px] text-[#A1A1AA] leading-relaxed">
+                  <p className="text-[13px] text-[#A1A1AA] leading-relaxed">
                     {tactic.explanation}
                   </p>
                 </div>

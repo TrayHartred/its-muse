@@ -70,12 +70,12 @@ export function AnalysisAccordion({ tactics, onTacticHover }: AnalysisAccordionP
 
               {/* Quote */}
               <div className="mb-3">
-                <p className="text-[12px] text-[#52525B] mb-1.5">Found in text:</p>
+                <p className="text-[13px] text-[#52525B] mb-1.5">Found in text:</p>
                 <div
                   className="px-3 py-2.5 rounded-lg bg-[#0A0A0B] border"
                   style={{ borderColor: `${colors.dot}25` }}
                 >
-                  <span className="font-mono text-[13px]" style={{ color: colors.text }}>
+                  <span className="font-mono text-[14px]" style={{ color: colors.text }}>
                     &quot;{tactic.quote}&quot;
                   </span>
                 </div>
@@ -83,8 +83,8 @@ export function AnalysisAccordion({ tactics, onTacticHover }: AnalysisAccordionP
 
               {/* Explanation */}
               <div>
-                <p className="text-[12px] text-[#52525B] mb-1.5">Why this is manipulative:</p>
-                <p className="text-[13px] text-[#A1A1AA] leading-relaxed">
+                <p className="text-[13px] text-[#52525B] mb-1.5">Why this is manipulative:</p>
+                <p className="text-[15px] text-[#A1A1AA] leading-relaxed">
                   {tactic.explanation}
                 </p>
               </div>
