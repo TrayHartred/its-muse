@@ -76,12 +76,17 @@ export function InputPanel({ onSubmit, isLoading }: InputPanelProps) {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen px-4">
-      <div className="flex items-center gap-3 mb-6">
-        <h1 className="text-3xl font-bold tracking-wider font-mono">
-          Muse
-        </h1>
-        <span className="w-2.5 h-2.5 rounded-full bg-[#FF5C00]" />
-        <span className="text-3xl font-light text-[#6B6B70]">Filter</span>
+      <div className="flex flex-col items-center gap-4 mb-8">
+        <div className="flex items-center gap-3">
+          <h1 className="text-4xl font-bold tracking-wider font-mono">
+            Muse
+          </h1>
+          <span className="w-2.5 h-2.5 rounded-full bg-[#FF5C00] shadow-[0_0_12px_rgba(255,92,0,0.6)]" />
+          <span className="text-4xl font-light text-[#6B6B70]">Filter</span>
+        </div>
+        <p className="text-[#ADADB0] text-lg text-center max-w-md">
+          Detect manipulation tactics in any text and get a clean, neutral version
+        </p>
       </div>
 
       {/* Init Status Banner */}
@@ -134,14 +139,10 @@ export function InputPanel({ onSubmit, isLoading }: InputPanelProps) {
       <button
         onClick={handleExampleClick}
         disabled={isLoading || initStatus.status !== 'ready'}
-        className="mt-4 text-sm text-[#6B6B70] hover:text-[#ADADB0] transition-colors disabled:opacity-50"
+        className="mt-6 px-4 py-2 text-sm text-[#6B6B70] hover:text-[#ADADB0] hover:bg-[#1A1A1D] rounded-lg border border-transparent hover:border-[#2A2A2E] transition-all disabled:opacity-50"
       >
-        Try example: &quot;{EXAMPLE_TEXT.slice(0, 40)}...&quot;
+        Try example →
       </button>
-
-      <p className="mt-4 text-center text-sm text-[#4A4A4E]">
-        Paste your text and click Analyze
-      </p>
     </div>
   );
 }

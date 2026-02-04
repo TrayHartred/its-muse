@@ -1,15 +1,8 @@
 'use client';
 
 import { useEffect, useRef, useCallback } from 'react';
-import dynamic from 'next/dynamic';
 
-export type BackgroundType = 'none' | 'aurora' | 'swirl' | 'pipeline' | 'blob' | 'cube' | 'sphere';
-
-// Lazy load WebGL background to avoid SSR issues
-const WebGLBackground = dynamic(() => import('./webgl-background').then(m => ({ default: m.WebGLBackground })), {
-  ssr: false,
-  loading: () => <div className="fixed inset-0 z-0 bg-[#0A0A0B]" />,
-});
+export type BackgroundType = 'none' | 'swirl' | 'aurora' | 'pipeline';
 
 interface AmbientBackgroundProps {
   type: BackgroundType;
@@ -418,11 +411,5 @@ export function AmbientBackground({ type }: AmbientBackgroundProps) {
 
   if (type === 'none') return null;
 
-  // WebGL backgrounds
-  if (type === 'blob' || type === 'cube' || type === 'sphere') {
-    return <WebGLBackground type={type} />;
-  }
-
-  // Canvas backgrounds
   return <div ref={containerRef} className="fixed inset-0 z-0 pointer-events-none" />;
 }

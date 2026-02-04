@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { BackgroundType } from '@/components/ambient-background';
 
 const STORAGE_KEY = 'muse-filter-background';
-const DEFAULT_BG: BackgroundType = 'aurora';
+const DEFAULT_BG: BackgroundType = 'swirl';
 
 export function useBackground() {
   const [background, setBackgroundState] = useState<BackgroundType>('none');
@@ -13,7 +13,7 @@ export function useBackground() {
   // Load from localStorage on mount
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY) as BackgroundType | null;
-    const validTypes = ['none', 'aurora', 'swirl', 'pipeline', 'blob', 'cube', 'sphere'];
+    const validTypes = ['none', 'swirl', 'aurora', 'pipeline'];
     setBackgroundState(saved && validTypes.includes(saved) ? saved : DEFAULT_BG);
     setIsLoaded(true);
   }, []);

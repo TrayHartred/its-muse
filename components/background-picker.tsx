@@ -9,12 +9,9 @@ interface BackgroundPickerProps {
 
 const backgrounds: { type: BackgroundType; label: string; color: string }[] = [
   { type: 'none', label: 'Off', color: '#6B6B70' },
-  { type: 'aurora', label: 'Aurora', color: '#22C55E' },
   { type: 'swirl', label: 'Swirl', color: '#8B5CF6' },
+  { type: 'aurora', label: 'Aurora', color: '#22C55E' },
   { type: 'pipeline', label: 'Pipeline', color: '#06B6D4' },
-  { type: 'blob', label: 'Blob', color: '#22C55E' },
-  { type: 'cube', label: 'Cube', color: '#FF5C00' },
-  { type: 'sphere', label: 'Sphere', color: '#A855F7' },
 ];
 
 export function BackgroundPicker({ current, onChange }: BackgroundPickerProps) {
