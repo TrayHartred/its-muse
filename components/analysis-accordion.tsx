@@ -22,22 +22,22 @@ export function AnalysisAccordion({ tactics, onTacticHover }: AnalysisAccordionP
   );
 
   return (
-    <div className="mt-8">
+    <div className="mt-6">
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-3">
-          <svg className="w-5 h-5 text-[#FF5C00]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <svg className="w-4 h-4 text-[#FF5C00]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
           </svg>
-          <span className="text-lg font-semibold text-white">Detected Manipulation Tactics</span>
+          <span className="text-[15px] font-semibold text-[#E4E4E7]">Detected Manipulation Tactics</span>
         </div>
-        <span className="px-3 py-1.5 bg-[#1A1A1D] rounded-lg text-[#ADADB0] font-mono text-sm">
+        <span className="px-2.5 py-1 bg-[#18181B] rounded-md text-[#71717A] font-mono text-[12px]">
           {tactics.length} found
         </span>
       </div>
 
       {/* Tactics - All expanded */}
-      <div className="space-y-4">
+      <div className="space-y-3">
         {sortedTactics.map((tactic, idx) => {
           const originalIndex = tactics.indexOf(tactic);
           const colors = severityColors[tactic.severity];
@@ -45,23 +45,23 @@ export function AnalysisAccordion({ tactics, onTacticHover }: AnalysisAccordionP
           return (
             <div
               key={idx}
-              className="bg-[#111113]/90 backdrop-blur-sm border border-[#1F1F23] rounded-2xl p-6"
+              className="bg-[#111113]/90 backdrop-blur-sm border border-[#1F1F23] rounded-xl p-4 sm:p-5"
               onMouseEnter={() => onTacticHover(originalIndex)}
               onMouseLeave={() => onTacticHover(null)}
             >
               {/* Tactic Header */}
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-3">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
                   <span
-                    className="w-3 h-3 rounded-full"
+                    className="w-2 h-2 rounded-full"
                     style={{ backgroundColor: colors.dot }}
                   />
-                  <span className="text-xl font-semibold text-white">
+                  <span className="text-[15px] font-semibold text-[#E4E4E7]">
                     {tactic.name}
                   </span>
                 </div>
                 <span
-                  className="px-3 py-1 rounded-md text-xs font-bold tracking-wide"
+                  className="px-2 py-0.5 rounded text-[10px] font-bold tracking-wide"
                   style={{ backgroundColor: colors.bg, color: colors.text }}
                 >
                   {tactic.severity.toUpperCase()}
@@ -69,13 +69,13 @@ export function AnalysisAccordion({ tactics, onTacticHover }: AnalysisAccordionP
               </div>
 
               {/* Quote */}
-              <div className="mb-4">
-                <p className="text-sm text-[#6B6B70] mb-2">Found in text:</p>
+              <div className="mb-3">
+                <p className="text-[12px] text-[#52525B] mb-1.5">Found in text:</p>
                 <div
-                  className="px-5 py-4 rounded-xl bg-[#0A0A0B] border"
-                  style={{ borderColor: `${colors.dot}33` }}
+                  className="px-3 py-2.5 rounded-lg bg-[#0A0A0B] border"
+                  style={{ borderColor: `${colors.dot}25` }}
                 >
-                  <span className="font-mono text-base" style={{ color: colors.text }}>
+                  <span className="font-mono text-[13px]" style={{ color: colors.text }}>
                     &quot;{tactic.quote}&quot;
                   </span>
                 </div>
@@ -83,8 +83,8 @@ export function AnalysisAccordion({ tactics, onTacticHover }: AnalysisAccordionP
 
               {/* Explanation */}
               <div>
-                <p className="text-sm text-[#6B6B70] mb-2">Why this is manipulative:</p>
-                <p className="text-base text-[#ADADB0] leading-relaxed">
+                <p className="text-[12px] text-[#52525B] mb-1.5">Why this is manipulative:</p>
+                <p className="text-[13px] text-[#A1A1AA] leading-relaxed">
                   {tactic.explanation}
                 </p>
               </div>

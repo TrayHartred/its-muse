@@ -50,17 +50,17 @@ export function HighlightedText({ text, tactics, onTacticHover }: HighlightedTex
               </TooltipTrigger>
               <TooltipContent
                 side="top"
-                className="max-w-sm bg-[#1A1A1D] border-[#2A2A2E] p-4 rounded-xl shadow-xl"
+                className="max-w-xs bg-[#18181B] border-[#27272A] p-3 rounded-lg shadow-xl"
               >
-                <div className="space-y-2">
+                <div className="space-y-1.5">
                   <div className="flex items-center gap-2">
                     <span
-                      className="w-2 h-2 rounded-full"
+                      className="w-1.5 h-1.5 rounded-full"
                       style={{ backgroundColor: colors.border }}
                     />
-                    <span className="font-semibold text-white">{tactic.name}</span>
+                    <span className="font-medium text-[13px] text-[#E4E4E7]">{tactic.name}</span>
                     <span
-                      className="px-2 py-0.5 rounded text-[10px] font-bold tracking-wide"
+                      className="px-1.5 py-0.5 rounded text-[9px] font-bold tracking-wide"
                       style={{
                         backgroundColor: `${colors.border}20`,
                         color: colors.border
@@ -69,7 +69,7 @@ export function HighlightedText({ text, tactics, onTacticHover }: HighlightedTex
                       {tactic.severity.toUpperCase()}
                     </span>
                   </div>
-                  <p className="text-sm text-[#ADADB0] leading-relaxed">
+                  <p className="text-[12px] text-[#A1A1AA] leading-relaxed">
                     {tactic.explanation}
                   </p>
                 </div>

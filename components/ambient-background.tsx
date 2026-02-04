@@ -411,5 +411,5 @@ export function AmbientBackground({ type }: AmbientBackgroundProps) {
 
   if (type === 'none') return null;
 
-  return <div ref={containerRef} className="fixed inset-0 z-0 pointer-events-none" />;
+  return <div ref={containerRef} className="fixed inset-0 z-0 pointer-events-none opacity-60 sm:opacity-100" />;
 }
