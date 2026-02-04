@@ -38,28 +38,28 @@ export function ComparisonView({
   return (
     <div className="space-y-5">
       {/* Summary Bar */}
-      <div className="flex items-center justify-between bg-[#111113]/90 backdrop-blur-sm border border-[#1F1F23] rounded-xl px-5 py-4">
-        <div className="flex items-center gap-6">
+      <div className="flex flex-wrap items-center justify-between gap-3 bg-[#111113]/90 backdrop-blur-sm border border-[#1F1F23] rounded-xl px-4 py-3 sm:px-5 sm:py-4">
+        <div className="flex flex-wrap items-center gap-3 sm:gap-6">
           <div className="flex items-center gap-2">
             <span className="text-sm text-[#6B6B70]">Found:</span>
-            <span className="text-lg font-semibold text-white">{total} {total === 1 ? 'tactic' : 'tactics'}</span>
+            <span className="text-base sm:text-lg font-semibold text-white">{total} {total === 1 ? 'tactic' : 'tactics'}</span>
           </div>
-          <div className="h-4 w-px bg-[#2A2A2E]" />
-          <div className="flex items-center gap-4 text-sm">
+          <div className="hidden sm:block h-4 w-px bg-[#2A2A2E]" />
+          <div className="flex items-center gap-3 sm:gap-4 text-xs sm:text-sm">
             {counts.high > 0 && (
-              <span className="flex items-center gap-1.5">
+              <span className="flex items-center gap-1">
                 <span className="w-2 h-2 rounded-full bg-[#EF4444]" />
                 <span className="text-[#EF4444] font-medium">{counts.high} high</span>
               </span>
             )}
             {counts.medium > 0 && (
-              <span className="flex items-center gap-1.5">
+              <span className="flex items-center gap-1">
                 <span className="w-2 h-2 rounded-full bg-[#F59E0B]" />
                 <span className="text-[#F59E0B] font-medium">{counts.medium} medium</span>
               </span>
             )}
             {counts.low > 0 && (
-              <span className="flex items-center gap-1.5">
+              <span className="flex items-center gap-1">
                 <span className="w-2 h-2 rounded-full bg-[#EAB308]" />
                 <span className="text-[#EAB308] font-medium">{counts.low} low</span>
               </span>
@@ -68,12 +68,12 @@ export function ComparisonView({
         </div>
         <button
           onClick={onCopy}
-          className="flex items-center gap-2 px-4 py-2 bg-[#22C55E]/10 hover:bg-[#22C55E]/20 border border-[#22C55E]/30 text-[#22C55E] font-medium rounded-lg text-sm transition-colors"
+          className="flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-[#22C55E]/10 hover:bg-[#22C55E]/20 border border-[#22C55E]/30 text-[#22C55E] font-medium rounded-lg text-xs sm:text-sm transition-colors"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
           </svg>
-          {copied ? 'Copied!' : 'Copy clean'}
+          {copied ? 'Copied!' : 'Copy'}
         </button>
       </div>
 

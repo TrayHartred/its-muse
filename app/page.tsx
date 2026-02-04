@@ -180,17 +180,17 @@ export default function Home() {
 
       {/* Header */}
       <header className="border-b border-[#1F1F23] bg-[#0A0A0B]/80 backdrop-blur-sm relative z-10">
-        <div className="max-w-6xl mx-auto px-6 lg:px-10 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <span className="text-lg font-bold tracking-wider font-mono text-white">Muse</span>
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-10 h-14 sm:h-16 flex items-center justify-between">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <span className="text-base sm:text-lg font-bold tracking-wider font-mono text-white">Muse</span>
             <span className="w-1.5 h-1.5 rounded-full bg-[#FF5C00]" />
-            <span className="text-lg font-light text-[#6B6B70]">Filter</span>
+            <span className="text-base sm:text-lg font-light text-[#6B6B70]">Filter</span>
           </div>
           <button
             onClick={handleReset}
-            className="flex items-center gap-2 px-4 py-2 bg-[#1A1A1D] hover:bg-[#2A2A2E] border border-[#2A2A2E] rounded-lg text-[#ADADB0] text-sm transition-colors"
+            className="flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-[#1A1A1D] hover:bg-[#2A2A2E] border border-[#2A2A2E] rounded-lg text-[#ADADB0] text-xs sm:text-sm transition-colors"
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
             New text
@@ -199,7 +199,7 @@ export default function Home() {
       </header>
 
       {/* Content */}
-      <div className="max-w-6xl mx-auto px-6 lg:px-10 py-8 relative z-10">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-10 py-6 sm:py-8 pb-20 sm:pb-8 relative z-10">
         {result && (
           <>
             <ComparisonView

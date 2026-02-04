@@ -16,7 +16,7 @@ const backgrounds: { type: BackgroundType; label: string; color: string }[] = [
 
 export function BackgroundPicker({ current, onChange }: BackgroundPickerProps) {
   return (
-    <div className="fixed bottom-4 right-4 z-50 flex items-center gap-1 p-1 bg-[#111113]/90 backdrop-blur-sm border border-[#2A2A2E] rounded-lg">
+    <div className="fixed bottom-4 right-4 z-50 hidden sm:flex items-center gap-1 p-1 bg-[#111113]/90 backdrop-blur-sm border border-[#2A2A2E] rounded-lg">
       {backgrounds.map(({ type, label, color }) => (
         <button
           key={type}
@@ -34,7 +34,7 @@ export function BackgroundPicker({ current, onChange }: BackgroundPickerProps) {
             className={`w-2 h-2 rounded-full transition-all ${current === type ? 'scale-110' : 'opacity-50'}`}
             style={{ backgroundColor: color }}
           />
-          <span className="hidden sm:inline">{label}</span>
+          {label}
         </button>
       ))}
     </div>
