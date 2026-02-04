@@ -61,3 +61,40 @@ TEXT TO ANALYZE:`;
 export function buildAuditMessage(text: string): string {
   return `${AUDIT_PROMPT}\n\n${text}`;
 }
+
+/**
+ * Regenerate Prompt
+ *
+ * For generating alternative neutral rewrites.
+ */
+export const REGENERATE_PROMPT = `REGENERATE TASK: Create a NEW neutral rewrite of the following text.
+
+The original text contains these manipulation tactics that must be removed:
+{TACTICS}
+
+Requirements for the new rewrite:
+- Preserve the CORE factual meaning
+- Remove ALL manipulative elements listed above
+- Use neutral, objective language
+- Be different from the previous rewrite: {PREVIOUS_REWRITE}
+- Maintain approximately the same length as original
+- Do not add new information
+
+Return ONLY the rewritten text, no explanation.
+
+ORIGINAL TEXT:
+{TEXT}`;
+
+/**
+ * Builds the regenerate message
+ */
+export function buildRegenerateMessage(
+  text: string,
+  tactics: string[],
+  previousRewrite: string
+): string {
+  return REGENERATE_PROMPT
+    .replace('{TACTICS}', tactics.map((t, i) => `${i + 1}. ${t}`).join('\n'))
+    .replace('{PREVIOUS_REWRITE}', previousRewrite)
+    .replace('{TEXT}', text);
+}

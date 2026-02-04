@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ADF - Arcimun Disclosure Filter",
+  title: "Muse Filter",
   description: "Strip LLM outputs of manipulative tactics, guardrails, and hidden framing",
 };
 
@@ -23,9 +23,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className="dark">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#0A0A0B] text-white min-h-screen`}
       >
         {children}
       </body>

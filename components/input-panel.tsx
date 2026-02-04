@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { Textarea } from '@/components/ui/textarea';
 
 interface InputPanelProps {
@@ -8,67 +8,140 @@ interface InputPanelProps {
   isLoading: boolean;
 }
 
+interface InitStatus {
+  status: 'loading' | 'ready' | 'error';
+  message: string;
+  model?: string;
+}
+
 const EXAMPLE_TEXT = 'Experts agree you must act now before it\'s too late! The shocking truth they don\'t want you to know is finally coming to light.';
 
 export function InputPanel({ onSubmit, isLoading }: InputPanelProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [initStatus, setInitStatus] = useState<InitStatus>({
+    status: 'loading',
+    message: 'Initializing SAL∴PAA...',
+  });
 
-  // Auto-filter on paste
+  // Initialize system on mount
   useEffect(() => {
-    const textarea = textareaRef.current;
-    if (!textarea) return;
+    async function initSystem() {
+      try {
+        const response = await fetch('/api/init');
+        const data = await response.json();
 
-    const handlePaste = (e: ClipboardEvent) => {
-      const text = e.clipboardData?.getData('text');
-      if (text && text.trim() && !isLoading) {
-        // Small delay to let paste complete
-        setTimeout(() => {
-          onSubmit(text.trim());
-        }, 100);
+        if (data.status === 'ready') {
+          setInitStatus({
+            status: 'ready',
+            message: data.message,
+            model: data.model,
+          });
+        } else {
+          setInitStatus({
+            status: 'error',
+            message: data.error || 'Initialization failed',
+          });
+        }
+      } catch {
+        setInitStatus({
+          status: 'error',
+          message: 'Failed to connect to Grok API',
+        });
       }
-    };
+    }
 
-    textarea.addEventListener('paste', handlePaste);
-    return () => textarea.removeEventListener('paste', handlePaste);
-  }, [onSubmit, isLoading]);
+    initSystem();
+  }, []);
+
+  const [text, setText] = useState('');
+
+  const handleAnalyze = () => {
+    if (text.trim() && !isLoading && initStatus.status === 'ready') {
+      onSubmit(text.trim());
+    }
+  };
 
   // Focus textarea on mount
   useEffect(() => {
-    textareaRef.current?.focus();
-  }, []);
+    if (initStatus.status === 'ready') {
+      textareaRef.current?.focus();
+    }
+  }, [initStatus.status]);
 
   const handleExampleClick = () => {
-    if (!isLoading) {
-      onSubmit(EXAMPLE_TEXT);
+    if (!isLoading && initStatus.status === 'ready') {
+      setText(EXAMPLE_TEXT);
     }
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[70vh] px-4">
-      <h1 className="text-3xl font-bold tracking-tight mb-2">
-        ADF &middot; Bullshit Filter
-      </h1>
+    <div className="flex flex-col items-center justify-center min-h-screen px-4">
+      <div className="flex items-center gap-3 mb-6">
+        <h1 className="text-3xl font-bold tracking-wider font-mono">
+          Muse
+        </h1>
+        <span className="w-2.5 h-2.5 rounded-full bg-[#FF5C00]" />
+        <span className="text-3xl font-light text-[#6B6B70]">Filter</span>
+      </div>
 
-      <div className="w-full max-w-2xl mt-8">
+      {/* Init Status Banner */}
+      <div className={`px-4 py-2 rounded-full text-sm flex items-center gap-2 ${
+        initStatus.status === 'loading'
+          ? 'bg-blue-500/10 text-blue-400'
+          : initStatus.status === 'ready'
+          ? 'bg-[#22C55E]/10 text-[#22C55E]'
+          : 'bg-red-500/10 text-red-400'
+      }`}>
+        {initStatus.status === 'loading' && (
+          <>
+            <span className="animate-spin h-3 w-3 border-2 border-current border-t-transparent rounded-full" />
+            {initStatus.message}
+          </>
+        )}
+        {initStatus.status === 'ready' && (
+          <>
+            <span className="w-1.5 h-1.5 rounded-full bg-[#22C55E] shadow-[0_0_8px_rgba(34,197,94,0.5)]" />
+            {initStatus.message}
+          </>
+        )}
+        {initStatus.status === 'error' && (
+          <span>✗ {initStatus.message}</span>
+        )}
+      </div>
+
+      <div className="w-full max-w-2xl mt-6 bg-[#111113]/90 backdrop-blur-sm border border-[#1F1F23] rounded-2xl p-6">
         <Textarea
           ref={textareaRef}
-          placeholder="Paste text to filter..."
-          className="min-h-[300px] resize-none text-base"
-          disabled={isLoading}
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          placeholder={initStatus.status === 'ready' ? 'Paste text to analyze for manipulation tactics...' : 'Waiting for system...'}
+          className="min-h-[200px] resize-none text-base bg-[#0A0A0B] border-[#2A2A2E] rounded-xl text-white placeholder:text-[#4A4A4E]"
+          disabled={isLoading || initStatus.status !== 'ready'}
         />
 
         <button
-          onClick={handleExampleClick}
-          disabled={isLoading}
-          className="mt-4 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          onClick={handleAnalyze}
+          disabled={isLoading || initStatus.status !== 'ready' || !text.trim()}
+          className="mt-4 w-full h-14 bg-gradient-to-br from-[#FF5C00] to-[#FF8A4C] text-white font-semibold rounded-xl flex items-center justify-center gap-2.5 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity tracking-wide"
         >
-          Try: &quot;{EXAMPLE_TEXT.slice(0, 50)}...&quot;
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          ANALYZE
         </button>
-
-        <p className="mt-6 text-center text-sm text-muted-foreground">
-          Cmd+V to paste and filter instantly
-        </p>
       </div>
+
+      <button
+        onClick={handleExampleClick}
+        disabled={isLoading || initStatus.status !== 'ready'}
+        className="mt-4 text-sm text-[#6B6B70] hover:text-[#ADADB0] transition-colors disabled:opacity-50"
+      >
+        Try example: &quot;{EXAMPLE_TEXT.slice(0, 40)}...&quot;
+      </button>
+
+      <p className="mt-4 text-center text-sm text-[#4A4A4E]">
+        Paste your text and click Analyze
+      </p>
     </div>
   );
 }

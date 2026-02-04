@@ -37,8 +37,8 @@ export const auditResponseSchema = {
         }
       },
       neutralRewrite: {
-        type: ['string', 'null'],
-        description: 'Neutral version of the text without manipulation, or null if no tactics found'
+        type: 'string',
+        description: 'Neutral version of the text without manipulation, or empty string if no tactics found'
       },
       summary: {
         type: 'string',
@@ -63,7 +63,7 @@ export interface Tactic {
 export interface AuditResponse {
   hasTactics: boolean;
   tactics: Tactic[];
-  neutralRewrite: string | null;
+  neutralRewrite: string;
   summary: string;
 }
 

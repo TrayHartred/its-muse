@@ -1,8 +1,8 @@
 import { auditResponseSchema, AuditResponse } from './schemas';
-import { SAL_PAA_PROMPT, buildAuditMessage } from './prompts';
+import { SAL_PAA_PROMPT, buildAuditMessage, buildRegenerateMessage } from './prompts';
 
 const GROK_API_URL = 'https://api.x.ai/v1/chat/completions';
-const GROK_MODEL = 'grok-4-1-fast-non-reasoning';
+const GROK_MODEL = 'grok-4-1-fast-reasoning';
 const GROK_TIMEOUT = 30000; // 30 seconds
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 1000; // 1 second
@@ -148,7 +148,7 @@ function parseAuditResponse(content: string): AuditResponse {
           ? (t.severity as 'low' | 'medium' | 'high')
           : 'medium',
       })),
-      neutralRewrite: parsed.neutralRewrite ?? null,
+      neutralRewrite: parsed.neutralRewrite ?? '',
       summary: parsed.summary,
     };
   } catch {
@@ -156,7 +156,7 @@ function parseAuditResponse(content: string): AuditResponse {
     return {
       hasTactics: false,
       tactics: [],
-      neutralRewrite: null,
+      neutralRewrite: '',
       summary: 'Failed to parse analysis response',
     };
   }
@@ -184,7 +184,7 @@ export async function auditText(
     return {
       hasTactics: false,
       tactics: [],
-      neutralRewrite: null,
+      neutralRewrite: '',
       summary: 'No text provided for analysis',
     };
   }
@@ -196,4 +196,94 @@ export async function auditText(
 
   const content = await callGrokWithRetry(messages, apiKey);
   return parseAuditResponse(content);
+}
+
+/**
+ * Call Grok for plain text response (no JSON schema)
+ */
+async function callGrokPlainText(
+  messages: GrokMessage[],
+  apiKey: string
+): Promise<string> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), GROK_TIMEOUT);
+
+  try {
+    const response = await fetch(GROK_API_URL, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: GROK_MODEL,
+        messages,
+        max_tokens: 2000,
+      }),
+      signal: controller.signal,
+    });
+
+    if (!response.ok) {
+      const text = await response.text();
+      const retryable = response.status >= 500 || response.status === 429;
+      throw new GrokAPIError(
+        `Grok API error: ${text.slice(0, 200)}`,
+        response.status,
+        response.status === 429 ? 'rate_limit' : 'api_error',
+        retryable
+      );
+    }
+
+    const data: GrokResponse = await response.json();
+    return data.choices[0]?.message?.content ?? '';
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
+/**
+ * Regenerate clean text
+ *
+ * Generates a new neutral rewrite based on detected tactics
+ */
+export async function regenerateCleanText(
+  originalText: string,
+  tacticNames: string[],
+  previousRewrite: string,
+  apiKey: string
+): Promise<string> {
+  if (!apiKey) {
+    throw new GrokAPIError(
+      'XAI_API_KEY not configured',
+      401,
+      'not_configured',
+      false
+    );
+  }
+
+  const messages: GrokMessage[] = [
+    { role: 'system', content: 'You are an expert at rewriting text to remove manipulative language while preserving meaning. Return ONLY the rewritten text.' },
+    { role: 'user', content: buildRegenerateMessage(originalText, tacticNames, previousRewrite) },
+  ];
+
+  let lastError: Error | null = null;
+
+  for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+    try {
+      return await callGrokPlainText(messages, apiKey);
+    } catch (error) {
+      lastError = error as Error;
+
+      if (error instanceof GrokAPIError && !error.retryable) {
+        throw error;
+      }
+
+      if (attempt < MAX_RETRIES - 1) {
+        const delay = RETRY_DELAY * Math.pow(2, attempt);
+        await sleep(delay);
+      }
+    }
+  }
+
+  throw lastError ?? new Error('Unknown error');
 }

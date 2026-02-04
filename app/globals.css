@@ -123,3 +123,31 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Terminal cursor blink animation */
+@keyframes terminal-blink {
+  0%, 50% {
+    opacity: 1;
+  }
+  51%, 100% {
+    opacity: 0;
+  }
+}
+
+.animate-terminal-cursor {
+  animation: terminal-blink 0.7s step-end infinite;
+}
+
+/* Fade out animation */
+@keyframes fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.animate-fade-out {
+  animation: fade-out 0.3s ease-out forwards;
+}

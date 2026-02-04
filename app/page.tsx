@@ -6,7 +6,10 @@ import { InputPanel } from '@/components/input-panel';
 import { ComparisonView } from '@/components/comparison-view';
 import { AnalysisAccordion } from '@/components/analysis-accordion';
 import { CopiedToast } from '@/components/copied-toast';
+import { AmbientBackground } from '@/components/ambient-background';
+import { BackgroundPicker } from '@/components/background-picker';
 import { useAutoCopy } from '@/hooks/use-auto-copy';
+import { useBackground } from '@/hooks/use-background';
 
 type AppState = 'input' | 'loading' | 'result';
 
@@ -16,8 +19,10 @@ export default function Home() {
   const [originalText, setOriginalText] = useState('');
   const [result, setResult] = useState<AuditResponse | null>(null);
   const [, setHighlightedTactic] = useState<number | null>(null);
+  const [isRegenerating, setIsRegenerating] = useState(false);
 
   const { autoCopy, copyText, showCopiedToast } = useAutoCopy();
+  const { background, setBackground, isLoaded } = useBackground();
 
   const handleFilter = useCallback(async (text: string) => {
     setState('loading');
@@ -63,6 +68,50 @@ export default function Home() {
     }
   }, [result, copyText]);
 
+  const handleRegenerate = useCallback(async () => {
+    if (!result || !originalText || isRegenerating) return;
+
+    setIsRegenerating(true);
+    // Clear the text first for fade-out effect
+    setResult(prev => prev ? { ...prev, neutralRewrite: '' } : null);
+
+    try {
+      const response = await fetch('/api/regenerate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          originalText,
+          tacticNames: result.tactics.map(t => t.name),
+          previousRewrite: result.neutralRewrite || '',
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to regenerate');
+      }
+
+      // Stream the response character by character
+      const reader = response.body?.getReader();
+      if (!reader) throw new Error('No reader');
+
+      const decoder = new TextDecoder();
+      let fullText = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value, { stream: true });
+        fullText += chunk;
+        setResult(prev => prev ? { ...prev, neutralRewrite: fullText } : null);
+      }
+    } catch (err) {
+      console.error('Regenerate error:', err);
+    } finally {
+      setIsRegenerating(false);
+    }
+  }, [result, originalText, isRegenerating]);
+
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -89,12 +138,16 @@ export default function Home() {
   // Input state
   if (state === 'input') {
     return (
-      <main className="min-h-screen">
-        <InputPanel onSubmit={handleFilter} isLoading={false} />
-        {error && (
-          <p className="text-center text-sm text-destructive mt-4">{error}</p>
-        )}
+      <main className="min-h-screen relative">
+        {isLoaded && <AmbientBackground type={background} />}
+        <div className="relative z-10">
+          <InputPanel onSubmit={handleFilter} isLoading={false} />
+          {error && (
+            <p className="text-center text-sm text-destructive mt-4">{error}</p>
+          )}
+        </div>
         <CopiedToast show={showCopiedToast} />
+        {isLoaded && <BackgroundPicker current={background} onChange={setBackground} />}
       </main>
     );
   }
@@ -102,40 +155,51 @@ export default function Home() {
   // Loading state
   if (state === 'loading') {
     return (
-      <main className="min-h-screen flex flex-col items-center justify-center px-4">
-        <div className="w-full max-w-2xl">
-          <div className="rounded-lg border bg-card p-6">
-            <p className="text-muted-foreground mb-4 line-clamp-3">
+      <main className="min-h-screen flex flex-col items-center justify-center px-4 relative">
+        {isLoaded && <AmbientBackground type={background} />}
+        <div className="w-full max-w-2xl relative z-10">
+          <div className="bg-[#111113]/95 backdrop-blur-sm border border-[#1F1F23] rounded-2xl p-8">
+            <p className="text-[#ADADB0] mb-6 line-clamp-3 text-base leading-relaxed">
               {originalText.slice(0, 200)}{originalText.length > 200 ? '...' : ''}
             </p>
-            <div className="flex items-center justify-center gap-2 text-muted-foreground">
-              <div className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full" />
-              <span>Filtering...</span>
+            <div className="flex items-center justify-center gap-3 text-[#FF5C00]">
+              <div className="animate-spin h-5 w-5 border-2 border-[#FF5C00] border-t-transparent rounded-full" />
+              <span className="font-medium">Analyzing...</span>
             </div>
           </div>
         </div>
+        {isLoaded && <BackgroundPicker current={background} onChange={setBackground} />}
       </main>
     );
   }
 
   // Result state
   return (
-    <main className="min-h-screen">
+    <main className="min-h-screen relative">
+      {isLoaded && <AmbientBackground type={background} />}
+
       {/* Header */}
-      <header className="border-b">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <h1 className="font-semibold">ADF &middot; Bullshit Filter</h1>
+      <header className="border-b border-[#1F1F23] bg-[#0A0A0B]/80 backdrop-blur-sm relative z-10">
+        <div className="max-w-6xl mx-auto px-6 lg:px-10 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <span className="text-lg font-bold tracking-wider font-mono text-white">Muse</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-[#FF5C00]" />
+            <span className="text-lg font-light text-[#6B6B70]">Filter</span>
+          </div>
           <button
             onClick={handleReset}
-            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-[#1A1A1D] hover:bg-[#2A2A2E] border border-[#2A2A2E] rounded-lg text-[#ADADB0] text-sm transition-colors"
           >
-            &larr; New text
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            New text
           </button>
         </div>
       </header>
 
       {/* Content */}
-      <div className="container mx-auto px-4 py-6">
+      <div className="max-w-6xl mx-auto px-6 lg:px-10 py-8 relative z-10">
         {result && (
           <>
             <ComparisonView
@@ -145,6 +209,8 @@ export default function Home() {
               onTacticHover={setHighlightedTactic}
               onCopy={handleCopy}
               copied={showCopiedToast}
+              onRegenerate={handleRegenerate}
+              isRegenerating={isRegenerating}
             />
 
             {result.tactics.length > 0 && (
@@ -158,6 +224,7 @@ export default function Home() {
       </div>
 
       <CopiedToast show={showCopiedToast} />
+      {isLoaded && <BackgroundPicker current={background} onChange={setBackground} />}
     </main>
   );
 }
