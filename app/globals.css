@@ -120,8 +120,27 @@
   * {
     @apply border-border outline-ring/50;
   }
+
+  html {
+    background-color: #0A0A0B;
+    overscroll-behavior: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  html.light {
+    background-color: #F8F8F5;
+  }
+
+  html.dark {
+    background-color: #0A0A0B;
+  }
+
   body {
     @apply bg-background text-foreground;
+    overscroll-behavior: none;
+    -webkit-overflow-scrolling: touch;
+    min-height: 100vh;
+    min-height: 100dvh;
   }
 }
 

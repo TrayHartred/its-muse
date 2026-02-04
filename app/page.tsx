@@ -157,7 +157,7 @@ export default function Home() {
   if (state === 'input') {
     return (
       <main
-        className="min-h-screen relative transition-colors duration-300"
+        className="min-h-screen min-h-[100dvh] relative transition-colors duration-300 overflow-x-hidden"
         style={{ backgroundColor: colors.bg }}
       >
         {isLoaded && <AmbientBackground type={background} theme={theme} />}
@@ -178,7 +178,7 @@ export default function Home() {
   if (state === 'loading') {
     return (
       <main
-        className="min-h-screen flex flex-col items-center justify-center px-4 relative transition-colors duration-300"
+        className="min-h-screen min-h-[100dvh] flex flex-col items-center justify-center px-4 relative transition-colors duration-300 overflow-x-hidden"
         style={{ backgroundColor: colors.bg }}
       >
         {isLoaded && <AmbientBackground type={background} theme={theme} />}
@@ -212,7 +212,7 @@ export default function Home() {
   // Result state
   return (
     <main
-      className="min-h-screen relative transition-colors duration-300"
+      className="min-h-screen min-h-[100dvh] relative transition-colors duration-300 overflow-x-hidden"
       style={{ backgroundColor: colors.bg }}
     >
       {isLoaded && <AmbientBackground type={background} theme={theme} />}
