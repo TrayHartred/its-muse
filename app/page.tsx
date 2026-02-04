@@ -153,11 +153,11 @@ export default function Home() {
     </footer>
   );
 
-  // Input state
+  // Input state - fixed, no scroll
   if (state === 'input') {
     return (
       <main
-        className="min-h-screen min-h-[100dvh] relative transition-colors duration-300 overflow-x-hidden"
+        className="h-screen h-[100dvh] relative transition-colors duration-300 overflow-hidden"
         style={{ backgroundColor: colors.bg }}
       >
         {isLoaded && <AmbientBackground type={background} theme={theme} />}
@@ -174,11 +174,11 @@ export default function Home() {
     );
   }
 
-  // Loading state
+  // Loading state - fixed, no scroll
   if (state === 'loading') {
     return (
       <main
-        className="min-h-screen min-h-[100dvh] flex flex-col items-center justify-center px-4 relative transition-colors duration-300 overflow-x-hidden"
+        className="h-screen h-[100dvh] flex flex-col items-center justify-center px-4 relative transition-colors duration-300 overflow-hidden"
         style={{ backgroundColor: colors.bg }}
       >
         {isLoaded && <AmbientBackground type={background} theme={theme} />}
