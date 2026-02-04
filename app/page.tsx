@@ -153,15 +153,15 @@ export default function Home() {
     </footer>
   );
 
-  // Input state - fixed, no scroll
+  // Input state - allow scroll when content overflows
   if (state === 'input') {
     return (
       <main
-        className="h-screen h-[100dvh] relative transition-colors duration-300 overflow-hidden"
+        className="min-h-screen min-h-[100dvh] relative transition-colors duration-300 overflow-x-hidden"
         style={{ backgroundColor: colors.bg }}
       >
         {isLoaded && <AmbientBackground type={background} theme={theme} />}
-        <div className="relative z-10">
+        <div className="relative z-10 min-h-screen min-h-[100dvh]">
           <InputPanel onSubmit={handleFilter} isLoading={false} theme={theme} />
           {error && (
             <p className="text-center text-sm text-red-500 mt-4">{error}</p>
