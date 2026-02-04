@@ -2,6 +2,7 @@
 
 import { Tactic } from '@/lib/schemas';
 import { mapTacticsToHighlights, splitTextByHighlights } from '@/lib/highlight-mapper';
+import { Theme } from '@/hooks/use-theme';
 import {
   Tooltip,
   TooltipContent,
@@ -13,6 +14,7 @@ interface HighlightedTextProps {
   text: string;
   tactics: Tactic[];
   onTacticHover?: (index: number | null) => void;
+  theme?: Theme;
 }
 
 const severityColors = {
@@ -21,9 +23,17 @@ const severityColors = {
   high: { bg: 'bg-[#EF4444]/20', hover: 'hover:bg-[#EF4444]/30', text: '#EF4444', border: '#EF4444' },
 };
 
-export function HighlightedText({ text, tactics, onTacticHover }: HighlightedTextProps) {
+export function HighlightedText({ text, tactics, onTacticHover, theme = 'dark' }: HighlightedTextProps) {
   const ranges = mapTacticsToHighlights(text, tactics);
   const segments = splitTextByHighlights(text, ranges);
+
+  // Theme colors
+  const tooltipColors = {
+    bg: theme === 'dark' ? '#18181B' : '#FFFFFF',
+    border: theme === 'dark' ? '#27272A' : '#E5E5E0',
+    text: theme === 'dark' ? '#E4E4E7' : '#1A1A1D',
+    textSecondary: theme === 'dark' ? '#A1A1AA' : '#52525B',
+  };
 
   return (
     <TooltipProvider delayDuration={200}>
@@ -50,7 +60,12 @@ export function HighlightedText({ text, tactics, onTacticHover }: HighlightedTex
               </TooltipTrigger>
               <TooltipContent
                 side="top"
-                className="max-w-xs bg-[#18181B] border-[#27272A] p-3 rounded-lg shadow-xl"
+                className="max-w-xs p-3 rounded-lg shadow-xl"
+                style={{
+                  backgroundColor: tooltipColors.bg,
+                  borderColor: tooltipColors.border,
+                  borderWidth: 1,
+                }}
               >
                 <div className="space-y-1.5">
                   <div className="flex items-center gap-2">
@@ -58,7 +73,9 @@ export function HighlightedText({ text, tactics, onTacticHover }: HighlightedTex
                       className="w-1.5 h-1.5 rounded-full"
                       style={{ backgroundColor: colors.border }}
                     />
-                    <span className="font-medium text-[14px] text-[#E4E4E7]">{tactic.name}</span>
+                    <span className="font-medium text-[14px]" style={{ color: tooltipColors.text }}>
+                      {tactic.name}
+                    </span>
                     <span
                       className="px-1.5 py-0.5 rounded text-[10px] font-bold tracking-wide"
                       style={{
@@ -69,7 +86,7 @@ export function HighlightedText({ text, tactics, onTacticHover }: HighlightedTex
                       {tactic.severity.toUpperCase()}
                     </span>
                   </div>
-                  <p className="text-[14px] text-[#A1A1AA] leading-relaxed">
+                  <p className="text-[14px] leading-relaxed" style={{ color: tooltipColors.textSecondary }}>
                     {tactic.explanation}
                   </p>
                 </div>

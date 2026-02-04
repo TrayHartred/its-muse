@@ -8,8 +8,10 @@ import { AnalysisAccordion } from '@/components/analysis-accordion';
 import { CopiedToast } from '@/components/copied-toast';
 import { AmbientBackground } from '@/components/ambient-background';
 import { BackgroundPicker } from '@/components/background-picker';
+import { ThemeToggle } from '@/components/theme-toggle';
 import { useAutoCopy } from '@/hooks/use-auto-copy';
 import { useBackground } from '@/hooks/use-background';
+import { useTheme } from '@/hooks/use-theme';
 
 type AppState = 'input' | 'loading' | 'result';
 
@@ -22,7 +24,10 @@ export default function Home() {
   const [isRegenerating, setIsRegenerating] = useState(false);
 
   const { autoCopy, copyText, showCopiedToast } = useAutoCopy();
-  const { background, setBackground, isLoaded } = useBackground();
+  const { background, setBackground, isLoaded: bgLoaded } = useBackground();
+  const { theme, toggleTheme, isLoaded: themeLoaded } = useTheme();
+
+  const isLoaded = bgLoaded && themeLoaded;
 
   const handleFilter = useCallback(async (text: string) => {
     setState('loading');
@@ -72,7 +77,6 @@ export default function Home() {
     if (!result || !originalText || isRegenerating) return;
 
     setIsRegenerating(true);
-    // Clear the text first for fade-out effect
     setResult(prev => prev ? { ...prev, neutralRewrite: '' } : null);
 
     try {
@@ -90,7 +94,6 @@ export default function Home() {
         throw new Error('Failed to regenerate');
       }
 
-      // Stream the response character by character
       const reader = response.body?.getReader();
       if (!reader) throw new Error('No reader');
 
@@ -115,9 +118,7 @@ export default function Home() {
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Cmd+C in result state copies clean text
       if (e.metaKey && e.key === 'c' && state === 'result' && result?.neutralRewrite) {
-        // Only if no text is selected
         const selection = window.getSelection();
         if (!selection || selection.toString() === '') {
           e.preventDefault();
@@ -125,7 +126,6 @@ export default function Home() {
         }
       }
 
-      // Esc resets to input
       if (e.key === 'Escape' && state === 'result') {
         handleReset();
       }
@@ -135,19 +135,41 @@ export default function Home() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [state, result, copyText, handleReset]);
 
+  // Theme-aware colors
+  const colors = {
+    bg: theme === 'dark' ? '#0A0A0B' : '#F8F8F5',
+    card: theme === 'dark' ? '#111113' : '#FFFFFF',
+    cardBorder: theme === 'dark' ? '#1F1F23' : '#E5E5E0',
+    text: theme === 'dark' ? '#E4E4E7' : '#1A1A1D',
+    textSecondary: theme === 'dark' ? '#A1A1AA' : '#52525B',
+    textMuted: theme === 'dark' ? '#71717A' : '#A1A1AA',
+    headerBg: theme === 'dark' ? 'rgba(10,10,11,0.8)' : 'rgba(248,248,245,0.9)',
+  };
+
+  // Footer with theme toggle
+  const Footer = () => (
+    <footer className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3">
+      {isLoaded && <ThemeToggle theme={theme} onToggle={toggleTheme} />}
+    </footer>
+  );
+
   // Input state
   if (state === 'input') {
     return (
-      <main className="min-h-screen relative">
-        {isLoaded && <AmbientBackground type={background} />}
+      <main
+        className="min-h-screen relative transition-colors duration-300"
+        style={{ backgroundColor: colors.bg }}
+      >
+        {isLoaded && <AmbientBackground type={background} theme={theme} />}
         <div className="relative z-10">
-          <InputPanel onSubmit={handleFilter} isLoading={false} />
+          <InputPanel onSubmit={handleFilter} isLoading={false} theme={theme} />
           {error && (
-            <p className="text-center text-sm text-destructive mt-4">{error}</p>
+            <p className="text-center text-sm text-red-500 mt-4">{error}</p>
           )}
         </div>
         <CopiedToast show={showCopiedToast} />
         {isLoaded && <BackgroundPicker current={background} onChange={setBackground} />}
+        <Footer />
       </main>
     );
   }
@@ -155,11 +177,24 @@ export default function Home() {
   // Loading state
   if (state === 'loading') {
     return (
-      <main className="min-h-screen flex flex-col items-center justify-center px-4 relative">
-        {isLoaded && <AmbientBackground type={background} />}
+      <main
+        className="min-h-screen flex flex-col items-center justify-center px-4 relative transition-colors duration-300"
+        style={{ backgroundColor: colors.bg }}
+      >
+        {isLoaded && <AmbientBackground type={background} theme={theme} />}
         <div className="w-full max-w-2xl relative z-10">
-          <div className="bg-[#111113]/95 backdrop-blur-sm border border-[#1F1F23] rounded-2xl p-8">
-            <p className="text-[#ADADB0] mb-6 line-clamp-3 text-base leading-relaxed">
+          <div
+            className="backdrop-blur-sm rounded-2xl p-8 transition-colors duration-300"
+            style={{
+              backgroundColor: theme === 'dark' ? 'rgba(17,17,19,0.95)' : 'rgba(255,255,255,0.95)',
+              borderColor: colors.cardBorder,
+              borderWidth: 1,
+            }}
+          >
+            <p
+              className="mb-6 line-clamp-3 text-base leading-relaxed"
+              style={{ color: colors.textSecondary }}
+            >
               {originalText.slice(0, 200)}{originalText.length > 200 ? '...' : ''}
             </p>
             <div className="flex items-center justify-center gap-3 text-[#FF5C00]">
@@ -169,26 +204,52 @@ export default function Home() {
           </div>
         </div>
         {isLoaded && <BackgroundPicker current={background} onChange={setBackground} />}
+        <Footer />
       </main>
     );
   }
 
   // Result state
   return (
-    <main className="min-h-screen relative">
-      {isLoaded && <AmbientBackground type={background} />}
+    <main
+      className="min-h-screen relative transition-colors duration-300"
+      style={{ backgroundColor: colors.bg }}
+    >
+      {isLoaded && <AmbientBackground type={background} theme={theme} />}
 
       {/* Header */}
-      <header className="border-b border-[#1F1F23] bg-[#0A0A0B]/80 backdrop-blur-sm relative z-10">
+      <header
+        className="border-b backdrop-blur-sm relative z-10 transition-colors duration-300"
+        style={{
+          backgroundColor: colors.headerBg,
+          borderColor: colors.cardBorder,
+        }}
+      >
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-10 h-14 sm:h-16 flex items-center justify-between">
           <div className="flex items-center gap-2 sm:gap-3">
-            <span className="text-base sm:text-lg font-bold tracking-wider font-mono text-white">Muse</span>
+            <span
+              className="text-base sm:text-lg font-bold tracking-wider font-mono"
+              style={{ color: colors.text }}
+            >
+              Muse
+            </span>
             <span className="w-1.5 h-1.5 rounded-full bg-[#FF5C00]" />
-            <span className="text-base sm:text-lg font-light text-[#6B6B70]">Filter</span>
+            <span
+              className="text-base sm:text-lg font-light"
+              style={{ color: colors.textMuted }}
+            >
+              Filter
+            </span>
           </div>
           <button
             onClick={handleReset}
-            className="flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-[#1A1A1D] hover:bg-[#2A2A2E] border border-[#2A2A2E] rounded-lg text-[#ADADB0] text-xs sm:text-sm transition-colors cursor-pointer"
+            className="flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg text-xs sm:text-sm transition-colors cursor-pointer"
+            style={{
+              backgroundColor: theme === 'dark' ? '#1A1A1D' : '#F0F0EB',
+              borderColor: theme === 'dark' ? '#2A2A2E' : '#E0E0DB',
+              borderWidth: 1,
+              color: colors.textSecondary,
+            }}
           >
             <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -199,7 +260,7 @@ export default function Home() {
       </header>
 
       {/* Content */}
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-10 py-6 sm:py-8 pb-20 sm:pb-8 relative z-10">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-10 py-6 sm:py-8 pb-24 sm:pb-20 relative z-10">
         {result && (
           <>
             <ComparisonView
@@ -211,12 +272,14 @@ export default function Home() {
               copied={showCopiedToast}
               onRegenerate={handleRegenerate}
               isRegenerating={isRegenerating}
+              theme={theme}
             />
 
             {result.tactics.length > 0 && (
               <AnalysisAccordion
                 tactics={result.tactics}
                 onTacticHover={setHighlightedTactic}
+                theme={theme}
               />
             )}
           </>
@@ -225,6 +288,7 @@ export default function Home() {
 
       <CopiedToast show={showCopiedToast} />
       {isLoaded && <BackgroundPicker current={background} onChange={setBackground} />}
+      <Footer />
     </main>
   );
 }

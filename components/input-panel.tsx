@@ -2,10 +2,12 @@
 
 import { useRef, useEffect, useState } from 'react';
 import { Textarea } from '@/components/ui/textarea';
+import { Theme } from '@/hooks/use-theme';
 
 interface InputPanelProps {
   onSubmit: (text: string) => void;
   isLoading: boolean;
+  theme?: Theme;
 }
 
 interface InitStatus {
@@ -16,7 +18,7 @@ interface InitStatus {
 
 const EXAMPLE_TEXT = 'Experts agree you must act now before it\'s too late! The shocking truth they don\'t want you to know is finally coming to light.';
 
-export function InputPanel({ onSubmit, isLoading }: InputPanelProps) {
+export function InputPanel({ onSubmit, isLoading, theme = 'dark' }: InputPanelProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [initStatus, setInitStatus] = useState<InitStatus>({
     status: 'loading',
@@ -74,17 +76,42 @@ export function InputPanel({ onSubmit, isLoading }: InputPanelProps) {
     }
   };
 
+  // Theme colors
+  const colors = {
+    text: theme === 'dark' ? '#E4E4E7' : '#1A1A1D',
+    textSecondary: theme === 'dark' ? '#A1A1AA' : '#52525B',
+    textMuted: theme === 'dark' ? '#6B6B70' : '#A1A1AA',
+    card: theme === 'dark' ? 'rgba(17,17,19,0.9)' : 'rgba(255,255,255,0.9)',
+    cardBorder: theme === 'dark' ? '#1F1F23' : '#E5E5E0',
+    input: theme === 'dark' ? '#0A0A0B' : '#FAFAF8',
+    inputBorder: theme === 'dark' ? '#2A2A2E' : '#E0E0DB',
+    inputText: theme === 'dark' ? '#FFFFFF' : '#1A1A1D',
+    placeholder: theme === 'dark' ? '#4A4A4E' : '#A1A1AA',
+    buttonHover: theme === 'dark' ? '#1A1A1D' : '#F0F0EB',
+  };
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen px-4">
       <div className="flex flex-col items-center gap-4 mb-8">
         <div className="flex items-center gap-3">
-          <h1 className="text-4xl font-bold tracking-wider font-mono">
+          <h1
+            className="text-4xl font-bold tracking-wider font-mono"
+            style={{ color: colors.text }}
+          >
             Muse
           </h1>
           <span className="w-2.5 h-2.5 rounded-full bg-[#FF5C00] shadow-[0_0_12px_rgba(255,92,0,0.6)]" />
-          <span className="text-4xl font-light text-[#6B6B70]">Filter</span>
+          <span
+            className="text-4xl font-light"
+            style={{ color: colors.textMuted }}
+          >
+            Filter
+          </span>
         </div>
-        <p className="text-[#ADADB0] text-lg text-center max-w-md">
+        <p
+          className="text-lg text-center max-w-md"
+          style={{ color: colors.textSecondary }}
+        >
           Detect manipulation tactics in any text and get a clean, neutral version
         </p>
       </div>
@@ -92,10 +119,10 @@ export function InputPanel({ onSubmit, isLoading }: InputPanelProps) {
       {/* Init Status Banner */}
       <div className={`px-4 py-2 rounded-full text-sm flex items-center gap-2 ${
         initStatus.status === 'loading'
-          ? 'bg-blue-500/10 text-blue-400'
+          ? 'bg-blue-500/10 text-blue-500'
           : initStatus.status === 'ready'
           ? 'bg-[#22C55E]/10 text-[#22C55E]'
-          : 'bg-red-500/10 text-red-400'
+          : 'bg-red-500/10 text-red-500'
       }`}>
         {initStatus.status === 'loading' && (
           <>
@@ -114,20 +141,32 @@ export function InputPanel({ onSubmit, isLoading }: InputPanelProps) {
         )}
       </div>
 
-      <div className="w-full max-w-2xl mt-6 bg-[#111113]/90 backdrop-blur-sm border border-[#1F1F23] rounded-2xl p-6">
+      <div
+        className="w-full max-w-2xl mt-6 backdrop-blur-sm rounded-2xl p-6 transition-colors duration-300"
+        style={{
+          backgroundColor: colors.card,
+          borderWidth: 1,
+          borderColor: colors.cardBorder,
+        }}
+      >
         <Textarea
           ref={textareaRef}
           value={text}
           onChange={(e) => setText(e.target.value)}
           placeholder={initStatus.status === 'ready' ? 'Paste text to analyze for manipulation tactics...' : 'Waiting for system...'}
-          className="min-h-[200px] resize-none text-base bg-[#0A0A0B] border-[#2A2A2E] rounded-xl text-white placeholder:text-[#4A4A4E]"
+          className="min-h-[200px] resize-none text-base rounded-xl transition-colors duration-300"
+          style={{
+            backgroundColor: colors.input,
+            borderColor: colors.inputBorder,
+            color: colors.inputText,
+          }}
           disabled={isLoading || initStatus.status !== 'ready'}
         />
 
         <button
           onClick={handleAnalyze}
           disabled={isLoading || initStatus.status !== 'ready' || !text.trim()}
-          className="mt-4 w-full h-14 bg-gradient-to-br from-[#FF5C00] to-[#FF8A4C] text-white font-semibold rounded-xl flex items-center justify-center gap-2.5 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity tracking-wide"
+          className="mt-4 w-full h-14 bg-gradient-to-br from-[#FF5C00] to-[#FF8A4C] text-white font-semibold rounded-xl flex items-center justify-center gap-2.5 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-opacity tracking-wide"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -139,7 +178,20 @@ export function InputPanel({ onSubmit, isLoading }: InputPanelProps) {
       <button
         onClick={handleExampleClick}
         disabled={isLoading || initStatus.status !== 'ready'}
-        className="mt-6 px-4 py-2 text-sm text-[#6B6B70] hover:text-[#ADADB0] hover:bg-[#1A1A1D] rounded-lg border border-transparent hover:border-[#2A2A2E] transition-all disabled:opacity-50"
+        className="mt-6 px-4 py-2 text-sm rounded-lg border border-transparent transition-all disabled:opacity-50 cursor-pointer"
+        style={{
+          color: colors.textMuted,
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor = colors.buttonHover;
+          e.currentTarget.style.borderColor = colors.cardBorder;
+          e.currentTarget.style.color = colors.textSecondary;
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = 'transparent';
+          e.currentTarget.style.borderColor = 'transparent';
+          e.currentTarget.style.color = colors.textMuted;
+        }}
       >
         Try example →
       </button>

@@ -2,6 +2,7 @@
 
 import { Tactic } from '@/lib/schemas';
 import { HighlightedText } from './highlighted-text';
+import { Theme } from '@/hooks/use-theme';
 
 interface ComparisonViewProps {
   originalText: string;
@@ -12,6 +13,7 @@ interface ComparisonViewProps {
   copied: boolean;
   onRegenerate: () => void;
   isRegenerating: boolean;
+  theme?: Theme;
 }
 
 export function ComparisonView({
@@ -23,6 +25,7 @@ export function ComparisonView({
   copied,
   onRegenerate,
   isRegenerating,
+  theme = 'dark',
 }: ComparisonViewProps) {
   // Count by severity
   const counts = tactics.reduce(
@@ -35,14 +38,35 @@ export function ComparisonView({
 
   const total = tactics.length;
 
+  // Theme colors
+  const colors = {
+    card: theme === 'dark' ? 'rgba(17,17,19,0.9)' : 'rgba(255,255,255,0.9)',
+    cardBorder: theme === 'dark' ? '#1F1F23' : '#E5E5E0',
+    text: theme === 'dark' ? '#E4E4E7' : '#1A1A1D',
+    textSecondary: theme === 'dark' ? '#A1A1AA' : '#52525B',
+    textMuted: theme === 'dark' ? '#71717A' : '#A1A1AA',
+    button: theme === 'dark' ? '#1A1A1D' : '#F0F0EB',
+    buttonBorder: theme === 'dark' ? '#27272A' : '#E0E0DB',
+    cleanText: theme === 'dark' ? '#E4E4E7' : '#1A1A1D',
+  };
+
   return (
     <div className="space-y-4">
       {/* Summary Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 bg-[#111113]/90 backdrop-blur-sm border border-[#1F1F23] rounded-xl px-4 py-3">
+      <div
+        className="flex flex-wrap items-center justify-between gap-3 backdrop-blur-sm rounded-xl px-4 py-3 transition-colors duration-300"
+        style={{
+          backgroundColor: colors.card,
+          borderWidth: 1,
+          borderColor: colors.cardBorder,
+        }}
+      >
         <div className="flex flex-wrap items-center gap-3 sm:gap-5">
           <div className="flex items-center gap-2">
-            <span className="text-[13px] text-[#71717A]">Found:</span>
-            <span className="text-sm font-semibold text-[#E4E4E7]">{total} {total === 1 ? 'tactic' : 'tactics'}</span>
+            <span className="text-[13px]" style={{ color: colors.textMuted }}>Found:</span>
+            <span className="text-sm font-semibold" style={{ color: colors.text }}>
+              {total} {total === 1 ? 'tactic' : 'tactics'}
+            </span>
           </div>
           <div className="flex items-center gap-3 text-[13px]">
             {counts.high > 0 && (
@@ -80,25 +104,48 @@ export function ComparisonView({
       {/* Comparison */}
       <div className="grid gap-4 md:grid-cols-2">
         {/* Original */}
-        <div className="bg-[#111113]/90 backdrop-blur-sm border border-[#1F1F23] rounded-xl p-4 sm:p-5">
-          <div className="flex items-center gap-2 mb-3 pb-2.5 border-b border-[#1F1F23]">
-            <svg className="w-4 h-4 text-[#71717A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div
+          className="backdrop-blur-sm rounded-xl p-4 sm:p-5 transition-colors duration-300"
+          style={{
+            backgroundColor: colors.card,
+            borderWidth: 1,
+            borderColor: colors.cardBorder,
+          }}
+        >
+          <div
+            className="flex items-center gap-2 mb-3 pb-2.5"
+            style={{ borderBottom: `1px solid ${colors.cardBorder}` }}
+          >
+            <svg className="w-4 h-4" style={{ color: colors.textMuted }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
-            <span className="text-[13px] font-medium tracking-wide text-[#71717A] uppercase">Original</span>
+            <span className="text-[13px] font-medium tracking-wide uppercase" style={{ color: colors.textMuted }}>
+              Original
+            </span>
           </div>
-          <div className="text-[15px] text-[#A1A1AA] leading-[1.7]">
+          <div className="text-[15px] leading-[1.7]" style={{ color: colors.textSecondary }}>
             <HighlightedText
               text={originalText}
               tactics={tactics}
               onTacticHover={onTacticHover}
+              theme={theme}
             />
           </div>
         </div>
 
         {/* Clean */}
-        <div className="bg-[#111113]/90 backdrop-blur-sm border border-[#22C55E]/20 rounded-xl p-4 sm:p-5">
-          <div className="flex items-center justify-between mb-3 pb-2.5 border-b border-[#1F1F23]">
+        <div
+          className="backdrop-blur-sm rounded-xl p-4 sm:p-5 transition-colors duration-300"
+          style={{
+            backgroundColor: colors.card,
+            borderWidth: 1,
+            borderColor: theme === 'dark' ? 'rgba(34,197,94,0.2)' : 'rgba(34,197,94,0.3)',
+          }}
+        >
+          <div
+            className="flex items-center justify-between mb-3 pb-2.5"
+            style={{ borderBottom: `1px solid ${colors.cardBorder}` }}
+          >
             <div className="flex items-center gap-2">
               <svg className="w-4 h-4 text-[#22C55E]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -108,7 +155,13 @@ export function ComparisonView({
             <button
               onClick={onRegenerate}
               disabled={isRegenerating}
-              className="flex items-center gap-1.5 px-2.5 py-1 bg-[#1A1A1D] hover:bg-[#2A2A2E] border border-[#27272A] rounded-md text-[#A1A1AA] text-[13px] transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer whitespace-nowrap"
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[13px] transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer whitespace-nowrap"
+              style={{
+                backgroundColor: colors.button,
+                borderWidth: 1,
+                borderColor: colors.buttonBorder,
+                color: colors.textSecondary,
+              }}
               title="Generate new version"
             >
               <svg
@@ -122,7 +175,10 @@ export function ComparisonView({
               {isRegenerating ? 'Generating...' : 'New version'}
             </button>
           </div>
-          <p className="text-[15px] text-[#E4E4E7] leading-[1.7] font-mono whitespace-pre-wrap">
+          <p
+            className="text-[15px] leading-[1.7] font-mono whitespace-pre-wrap"
+            style={{ color: colors.cleanText }}
+          >
             {cleanText}
             {isRegenerating && (
               <span className="inline-block w-[2px] h-[1.1em] bg-[#22C55E] ml-0.5 align-middle animate-terminal-cursor" />

@@ -2,10 +2,13 @@
 
 import { useEffect, useRef, useCallback } from 'react';
 
+import { Theme } from '@/hooks/use-theme';
+
 export type BackgroundType = 'none' | 'swirl' | 'aurora' | 'pipeline';
 
 interface AmbientBackgroundProps {
   type: BackgroundType;
+  theme?: Theme;
 }
 
 // Math utilities
@@ -87,11 +90,13 @@ class SimplexNoise {
   }
 }
 
-export function AmbientBackground({ type }: AmbientBackgroundProps) {
+export function AmbientBackground({ type, theme = 'dark' }: AmbientBackgroundProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const animationRef = useRef<number>(0);
   const canvasARef = useRef<HTMLCanvasElement | null>(null);
   const canvasBRef = useRef<HTMLCanvasElement | null>(null);
+  const themeRef = useRef(theme);
+  themeRef.current = theme;
 
   const runAurora = useCallback((container: HTMLDivElement) => {
     const rayCount = 500;
@@ -104,7 +109,7 @@ export function AmbientBackground({ type }: AmbientBackgroundProps) {
     const baseTTL = 50, rangeTTL = 100;
     const noiseStrength = 100;
     const xOff = 0.0015, yOff = 0.0015, zOff = 0.0015;
-    const backgroundColor = 'hsla(220,60%,3%,0.95)';
+    const getBackgroundColor = () => themeRef.current === 'dark' ? 'hsla(220,60%,3%,0.95)' : 'hsla(45,30%,96%,0.95)';
 
     const canvasA = document.createElement('canvas');
     const canvasB = document.createElement('canvas');
@@ -160,7 +165,7 @@ export function AmbientBackground({ type }: AmbientBackgroundProps) {
     const draw = () => {
       tick++;
       ctxA.clearRect(0, 0, canvasA.width, canvasA.height);
-      ctxB.fillStyle = backgroundColor;
+      ctxB.fillStyle = getBackgroundColor();
       ctxB.fillRect(0, 0, canvasB.width, canvasB.height);
 
       for (let i = 0; i < rayPropsLength; i += rayPropCount) {
@@ -175,7 +180,7 @@ export function AmbientBackground({ type }: AmbientBackgroundProps) {
 
       ctxB.save();
       ctxB.filter = 'blur(12px)';
-      ctxB.globalCompositeOperation = 'lighter';
+      ctxB.globalCompositeOperation = themeRef.current === 'dark' ? 'lighter' : 'multiply';
       ctxB.drawImage(canvasA, 0, 0);
       ctxB.restore();
 
@@ -198,7 +203,7 @@ export function AmbientBackground({ type }: AmbientBackgroundProps) {
     const baseHue = 220, rangeHue = 100;
     const noiseSteps = 8;
     const xOff = 0.00125, yOff = 0.00125, zOff = 0.0005;
-    const backgroundColor = 'hsla(260,40%,5%,0.95)';
+    const getBackgroundColor = () => themeRef.current === 'dark' ? 'hsla(260,40%,5%,0.95)' : 'hsla(45,25%,95%,0.95)';
 
     const canvasA = document.createElement('canvas');
     const canvasB = document.createElement('canvas');
@@ -236,9 +241,10 @@ export function AmbientBackground({ type }: AmbientBackgroundProps) {
     const draw = () => {
       tick++;
       ctxA.clearRect(0, 0, canvasA.width, canvasA.height);
-      ctxB.fillStyle = backgroundColor;
+      ctxB.fillStyle = getBackgroundColor();
       ctxB.fillRect(0, 0, canvasA.width, canvasA.height);
 
+      const isLight = themeRef.current === 'light';
       for (let i = 0; i < particlePropsLength; i += particlePropCount) {
         const x = particleProps[i], y = particleProps[i+1];
         const n = simplex.noise3D(x * xOff, y * yOff, tick * zOff) * noiseSteps * TAU;
@@ -251,7 +257,8 @@ export function AmbientBackground({ type }: AmbientBackgroundProps) {
         ctxA.save();
         ctxA.lineCap = 'round';
         ctxA.lineWidth = radius;
-        ctxA.strokeStyle = `hsla(${hue},100%,60%,${fadeInOut(life, ttl)})`;
+        const lightness = isLight ? '40%' : '60%';
+        ctxA.strokeStyle = `hsla(${hue},100%,${lightness},${fadeInOut(life, ttl)})`;
         ctxA.beginPath();
         ctxA.moveTo(x, y);
         ctxA.lineTo(x2, y2);
@@ -270,13 +277,13 @@ export function AmbientBackground({ type }: AmbientBackgroundProps) {
       }
 
       ctxB.save();
-      ctxB.filter = 'blur(8px) brightness(200%)';
-      ctxB.globalCompositeOperation = 'lighter';
+      ctxB.filter = isLight ? 'blur(8px) brightness(100%)' : 'blur(8px) brightness(200%)';
+      ctxB.globalCompositeOperation = isLight ? 'multiply' : 'lighter';
       ctxB.drawImage(canvasA, 0, 0);
       ctxB.restore();
 
       ctxB.save();
-      ctxB.globalCompositeOperation = 'lighter';
+      ctxB.globalCompositeOperation = isLight ? 'multiply' : 'lighter';
       ctxB.drawImage(canvasA, 0, 0);
       ctxB.restore();
 
@@ -299,7 +306,7 @@ export function AmbientBackground({ type }: AmbientBackgroundProps) {
     const baseTTL = 100, rangeTTL = 300;
     const baseWidth = 2, rangeWidth = 4;
     const baseHue = 180, rangeHue = 60;
-    const backgroundColor = 'hsla(150,80%,1%,0.95)';
+    const getBackgroundColor = () => themeRef.current === 'dark' ? 'hsla(150,80%,1%,0.95)' : 'hsla(45,25%,95%,0.95)';
 
     const canvasA = document.createElement('canvas');
     const canvasB = document.createElement('canvas');
@@ -364,10 +371,11 @@ export function AmbientBackground({ type }: AmbientBackgroundProps) {
         if (life > ttl) initPipe(i);
       }
 
-      ctxB.fillStyle = backgroundColor;
+      ctxB.fillStyle = getBackgroundColor();
       ctxB.fillRect(0, 0, canvasB.width, canvasB.height);
       ctxB.save();
       ctxB.filter = 'blur(12px)';
+      ctxB.globalCompositeOperation = themeRef.current === 'dark' ? 'source-over' : 'multiply';
       ctxB.drawImage(canvasA, 0, 0);
       ctxB.restore();
       ctxB.drawImage(canvasA, 0, 0);
