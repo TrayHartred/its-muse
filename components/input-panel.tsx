@@ -86,7 +86,7 @@ export function InputPanel({ onSubmit, isLoading, theme = 'dark' }: InputPanelPr
     input: theme === 'dark' ? '#0A0A0B' : '#FAFAF8',
     inputBorder: theme === 'dark' ? '#2A2A2E' : '#E0E0DB',
     inputText: theme === 'dark' ? '#FFFFFF' : '#1A1A1D',
-    placeholder: theme === 'dark' ? '#4A4A4E' : '#A1A1AA',
+    placeholder: theme === 'dark' ? '#71717A' : '#71717A',
     buttonHover: theme === 'dark' ? '#1A1A1D' : '#F0F0EB',
   };
 
@@ -142,11 +142,12 @@ export function InputPanel({ onSubmit, isLoading, theme = 'dark' }: InputPanelPr
       </div>
 
       <div
-        className="w-full max-w-2xl mt-6 backdrop-blur-sm rounded-2xl p-6 transition-colors duration-300"
+        className="w-full max-w-2xl mt-6 backdrop-blur-sm rounded-2xl transition-colors duration-300"
         style={{
           backgroundColor: colors.card,
           borderWidth: 1,
           borderColor: colors.cardBorder,
+          padding: '15px',
         }}
       >
         <Textarea
@@ -154,11 +155,15 @@ export function InputPanel({ onSubmit, isLoading, theme = 'dark' }: InputPanelPr
           value={text}
           onChange={(e) => setText(e.target.value)}
           placeholder={initStatus.status === 'ready' ? 'Paste text to analyze for manipulation tactics...' : 'Waiting for system...'}
-          className="min-h-[200px] resize-none text-base rounded-xl transition-colors duration-300"
+          className="min-h-[200px] resize-none text-[15px] rounded-xl transition-colors duration-300"
           style={{
             backgroundColor: colors.input,
             borderColor: colors.inputBorder,
             color: colors.inputText,
+            paddingTop: '14px',
+            paddingBottom: '14px',
+            paddingLeft: '14px',
+            paddingRight: '14px',
           }}
           disabled={isLoading || initStatus.status !== 'ready'}
         />
@@ -166,31 +171,31 @@ export function InputPanel({ onSubmit, isLoading, theme = 'dark' }: InputPanelPr
         <button
           onClick={handleAnalyze}
           disabled={isLoading || initStatus.status !== 'ready' || !text.trim()}
-          className="mt-4 w-full h-14 bg-gradient-to-br from-[#FF5C00] to-[#FF8A4C] text-white font-semibold rounded-xl flex items-center justify-center gap-2.5 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-opacity tracking-wide"
+          className="w-full h-12 bg-gradient-to-br from-[#FF5C00] to-[#FF8A4C] hover:from-[#FF6A1A] hover:to-[#FF9A5C] text-white font-medium rounded-xl flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-all"
+          style={{ marginTop: '15px' }}
         >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
-          ANALYZE
+          <span className="text-[15px]">Analyze</span>
         </button>
       </div>
 
       <button
         onClick={handleExampleClick}
         disabled={isLoading || initStatus.status !== 'ready'}
-        className="mt-6 px-4 py-2 text-sm rounded-lg border border-transparent transition-all disabled:opacity-50 cursor-pointer"
+        className="mt-5 px-4 py-2 text-[14px] rounded-lg transition-all disabled:opacity-50 cursor-pointer"
         style={{
-          color: colors.textMuted,
+          color: colors.textSecondary,
+          backgroundColor: colors.buttonHover,
+          borderWidth: 1,
+          borderColor: colors.cardBorder,
         }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.backgroundColor = colors.buttonHover;
-          e.currentTarget.style.borderColor = colors.cardBorder;
-          e.currentTarget.style.color = colors.textSecondary;
+          e.currentTarget.style.backgroundColor = theme === 'dark' ? '#27272A' : '#E5E5E0';
         }}
         onMouseLeave={(e) => {
-          e.currentTarget.style.backgroundColor = 'transparent';
-          e.currentTarget.style.borderColor = 'transparent';
-          e.currentTarget.style.color = colors.textMuted;
+          e.currentTarget.style.backgroundColor = colors.buttonHover;
         }}
       >
         Try example →
