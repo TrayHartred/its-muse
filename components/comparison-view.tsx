@@ -108,7 +108,7 @@ export function ComparisonView({
             <button
               onClick={onRegenerate}
               disabled={isRegenerating}
-              className="flex items-center gap-1.5 px-2.5 py-1 bg-[#1A1A1D] hover:bg-[#2A2A2E] border border-[#27272A] rounded-md text-[#A1A1AA] text-[13px] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center gap-1.5 px-2.5 py-1 bg-[#1A1A1D] hover:bg-[#2A2A2E] border border-[#27272A] rounded-md text-[#A1A1AA] text-[13px] transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
               title="Generate new version"
             >
               <svg

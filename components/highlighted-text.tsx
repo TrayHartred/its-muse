@@ -69,7 +69,7 @@ export function HighlightedText({ text, tactics, onTacticHover }: HighlightedTex
                       {tactic.severity.toUpperCase()}
                     </span>
                   </div>
-                  <p className="text-[13px] text-[#A1A1AA] leading-relaxed">
+                  <p className="text-[14px] text-[#A1A1AA] leading-relaxed">
                     {tactic.explanation}
                   </p>
                 </div>
